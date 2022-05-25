@@ -23,11 +23,12 @@ class DBManager:
         query = select(self.model)
         for aggregator in aggregators:
             query = aggregator(query)
-        try:
-            if order_by_field := getattr(self.model, order_by):
+        if order_by:
+            try:
+                order_by_field = getattr(self.model, order_by)
                 if order_by.startswith("-"):
                     order_by_field = order_by_field.desc()
                 query = query.order_by(order_by_field)
-        except AttributeError:
-            pass
+            except AttributeError:
+                pass
         return (await self.session.execute(query)).scalars().all()
